@@ -24,8 +24,6 @@ type InstICmp struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type // boolean or boolean vector
 	// (optional) Metadata.
 	Metadata
 }
@@ -34,8 +32,6 @@ type InstICmp struct {
 // predicate and integer scalar or vector operands.
 func NewICmp(pred enum.IPred, x, y value.Value) *InstICmp {
 	inst := &InstICmp{Pred: pred, X: x, Y: y}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -45,20 +41,17 @@ func (inst *InstICmp) String() string {
 	return fmt.Sprintf("%s %s", inst.Type(), inst.Ident())
 }
 
-// Type returns the type of the instruction.
+// Type returns the type of the instruction. The result type is either boolean
+// type or vector of booleans type.
 func (inst *InstICmp) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		switch xType := inst.X.Type().(type) {
-		case *types.IntType, *types.PointerType:
-			inst.Typ = types.I1
-		case *types.VectorType:
-			inst.Typ = types.NewVector(xType.Len, types.I1)
-		default:
-			panic(fmt.Errorf("invalid icmp operand type; expected *types.IntType, *types.PointerType or *types.VectorType, got %T", xType))
-		}
+	switch xType := inst.X.Type().(type) {
+	case *types.IntType, *types.PointerType:
+		return types.I1
+	case *types.VectorType:
+		return types.NewVector(xType.Len, types.I1)
+	default:
+		panic(fmt.Errorf("invalid icmp operand type; expected *types.IntType, *types.PointerType or *types.VectorType, got %T", xType))
 	}
-	return inst.Typ
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -87,8 +80,6 @@ type InstFCmp struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type // boolean or boolean vector
 	// (optional) Fast math flags.
 	FastMathFlags []enum.FastMathFlag
 	// (optional) Metadata.
@@ -99,8 +90,6 @@ type InstFCmp struct {
 // comparison predicate and floating-point scalar or vector operands.
 func NewFCmp(pred enum.FPred, x, y value.Value) *InstFCmp {
 	inst := &InstFCmp{Pred: pred, X: x, Y: y}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -110,20 +99,17 @@ func (inst *InstFCmp) String() string {
 	return fmt.Sprintf("%s %s", inst.Type(), inst.Ident())
 }
 
-// Type returns the type of the instruction.
+// Type returns the type of the instruction. The result type is either boolean
+// type or vector of booleans type.
 func (inst *InstFCmp) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		switch xType := inst.X.Type().(type) {
-		case *types.FloatType:
-			inst.Typ = types.I1
-		case *types.VectorType:
-			inst.Typ = types.NewVector(xType.Len, types.I1)
-		default:
-			panic(fmt.Errorf("invalid fcmp operand type; expected *types.FloatType or *types.VectorType, got %T", xType))
-		}
+	switch xType := inst.X.Type().(type) {
+	case *types.FloatType:
+		return types.I1
+	case *types.VectorType:
+		return types.NewVector(xType.Len, types.I1)
+	default:
+		panic(fmt.Errorf("invalid fcmp operand type; expected *types.FloatType or *types.VectorType, got %T", xType))
 	}
-	return inst.Typ
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -154,8 +140,6 @@ type InstPhi struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type // type of incoming value
 	// (optional) Metadata.
 	Metadata
 }
@@ -163,8 +147,6 @@ type InstPhi struct {
 // NewPhi returns a new phi instruction based on the given incoming values.
 func NewPhi(incs ...*Incoming) *InstPhi {
 	inst := &InstPhi{Incs: incs}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -174,13 +156,10 @@ func (inst *InstPhi) String() string {
 	return fmt.Sprintf("%s %s", inst.Type(), inst.Ident())
 }
 
-// Type returns the type of the instruction.
+// Type returns the type of the instruction. The result type is the type of the
+// incoming value.
 func (inst *InstPhi) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.Incs[0].X.Type()
-	}
-	return inst.Typ
+	return inst.Incs[0].X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -189,7 +168,7 @@ func (inst *InstPhi) LLString() string {
 	// MetadataAttachment)+?
 	buf := &strings.Builder{}
 	fmt.Fprintf(buf, "%s = ", inst.Ident())
-	fmt.Fprintf(buf, "phi %s ", inst.Typ)
+	fmt.Fprintf(buf, "phi %s ", inst.Type())
 	for i, inc := range inst.Incs {
 		if i != 0 {
 			buf.WriteString(", ")
@@ -237,8 +216,6 @@ type InstSelect struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Fast math flags.
 	FastMathFlags []enum.FastMathFlag
 	// (optional) Metadata.
@@ -249,8 +226,6 @@ type InstSelect struct {
 // condition and operands.
 func NewSelect(cond, x, y value.Value) *InstSelect {
 	inst := &InstSelect{Cond: cond, X: x, Y: y}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -262,11 +237,7 @@ func (inst *InstSelect) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstSelect) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.X.Type()
-	}
-	return inst.Typ
+	return inst.X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -305,9 +276,6 @@ type InstCall struct {
 
 	// extra.
 
-	// Type of result produced by the instruction, or function signature of the
-	// callee (as used when callee is variadic).
-	Typ types.Type
 	// (optional) Tail; zero if not present.
 	Tail enum.Tail
 	// (optional) Fast math flags.
@@ -332,8 +300,6 @@ type InstCall struct {
 // TODO: specify the set of underlying types of callee.
 func NewCall(callee value.Value, args ...value.Value) *InstCall {
 	inst := &InstCall{Callee: callee, Args: args}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -345,26 +311,8 @@ func (inst *InstCall) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstCall) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		t, ok := inst.Callee.Type().(*types.PointerType)
-		if !ok {
-			panic(fmt.Errorf("invalid callee type; expected *types.PointerType, got %T", inst.Callee.Type()))
-		}
-		sig, ok := t.ElemType.(*types.FuncType)
-		if !ok {
-			panic(fmt.Errorf("invalid callee type; expected *types.FuncType, got %T", t.ElemType))
-		}
-		if sig.Variadic {
-			inst.Typ = sig
-		} else {
-			inst.Typ = sig.RetType
-		}
-	}
-	if t, ok := inst.Typ.(*types.FuncType); ok {
-		return t.RetType
-	}
-	return inst.Typ
+	sig := inst.Sig()
+	return sig.RetType
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -395,13 +343,11 @@ func (inst *InstCall) LLString() string {
 		fmt.Fprintf(buf, " %s", inst.AddrSpace)
 	}
 	// Use function signature instead of return type for variadic functions.
-	typ := inst.Type()
-	if t, ok := inst.Typ.(*types.FuncType); ok {
-		if t.Variadic {
-			typ = t
-		}
+	calleeType := inst.Type()
+	if sig := inst.Sig(); sig.Variadic {
+		calleeType = sig
 	}
-	fmt.Fprintf(buf, " %s %s(", typ, inst.Callee.Ident())
+	fmt.Fprintf(buf, " %s %s(", calleeType, inst.Callee.Ident())
 	for i, arg := range inst.Args {
 		if i != 0 {
 			buf.WriteString(", ")
@@ -426,6 +372,19 @@ func (inst *InstCall) LLString() string {
 		fmt.Fprintf(buf, ", %s", md)
 	}
 	return buf.String()
+}
+
+// Sig returns the function signature of the callee.
+func (inst *InstCall) Sig() *types.FuncType {
+	t, ok := inst.Callee.Type().(*types.PointerType)
+	if !ok {
+		panic(fmt.Errorf("invalid callee type; expected *types.PointerType, got %T", inst.Callee.Type()))
+	}
+	sig, ok := t.ElemType.(*types.FuncType)
+	if !ok {
+		panic(fmt.Errorf("invalid callee type; expected *types.FuncType, got %T", t.ElemType))
+	}
+	return sig
 }
 
 // ~~~ [ va_arg ] ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

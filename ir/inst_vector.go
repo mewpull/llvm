@@ -23,8 +23,6 @@ type InstExtractElement struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Metadata.
 	Metadata
 }
@@ -33,8 +31,6 @@ type InstExtractElement struct {
 // vector and element index.
 func NewExtractElement(x, index value.Value) *InstExtractElement {
 	inst := &InstExtractElement{X: x, Index: index}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -46,15 +42,11 @@ func (inst *InstExtractElement) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstExtractElement) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		t, ok := inst.X.Type().(*types.VectorType)
-		if !ok {
-			panic(fmt.Errorf("invalid vector type; expected *types.VectorType, got %T", inst.X.Type()))
-		}
-		inst.Typ = t.ElemType
+	t, ok := inst.X.Type().(*types.VectorType)
+	if !ok {
+		panic(fmt.Errorf("invalid vector type; expected *types.VectorType, got %T", inst.X.Type()))
 	}
-	return inst.Typ
+	return t.ElemType
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -85,8 +77,6 @@ type InstInsertElement struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ *types.VectorType
 	// (optional) Metadata.
 	Metadata
 }
@@ -95,8 +85,6 @@ type InstInsertElement struct {
 // vector, element and element index.
 func NewInsertElement(x, elem, index value.Value) *InstInsertElement {
 	inst := &InstInsertElement{X: x, Elem: elem, Index: index}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -108,15 +96,11 @@ func (inst *InstInsertElement) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstInsertElement) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		t, ok := inst.X.Type().(*types.VectorType)
-		if !ok {
-			panic(fmt.Errorf("invalid vector type; expected *types.VectorType, got %T", inst.X.Type()))
-		}
-		inst.Typ = t
+	t, ok := inst.X.Type().(*types.VectorType)
+	if !ok {
+		panic(fmt.Errorf("invalid vector type; expected *types.VectorType, got %T", inst.X.Type()))
 	}
-	return inst.Typ
+	return t
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -145,8 +129,6 @@ type InstShuffleVector struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ *types.VectorType
 	// (optional) Metadata.
 	Metadata
 }
@@ -155,8 +137,6 @@ type InstShuffleVector struct {
 // vectors and shuffle mask.
 func NewShuffleVector(x, y, mask value.Value) *InstShuffleVector {
 	inst := &InstShuffleVector{X: x, Y: y, Mask: mask}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -169,18 +149,15 @@ func (inst *InstShuffleVector) String() string {
 // Type returns the type of the instruction.
 func (inst *InstShuffleVector) Type() types.Type {
 	// Cache type if not present.
-	if inst.Typ == nil {
-		xType, ok := inst.X.Type().(*types.VectorType)
-		if !ok {
-			panic(fmt.Errorf("invalid vector type; expected *types.VectorType, got %T", inst.X.Type()))
-		}
-		maskType, ok := inst.Mask.Type().(*types.VectorType)
-		if !ok {
-			panic(fmt.Errorf("invalid vector type; expected *types.VectorType, got %T", inst.Mask.Type()))
-		}
-		inst.Typ = types.NewVector(maskType.Len, xType.ElemType)
+	xType, ok := inst.X.Type().(*types.VectorType)
+	if !ok {
+		panic(fmt.Errorf("invalid vector type; expected *types.VectorType, got %T", inst.X.Type()))
 	}
-	return inst.Typ
+	maskType, ok := inst.Mask.Type().(*types.VectorType)
+	if !ok {
+		panic(fmt.Errorf("invalid vector type; expected *types.VectorType, got %T", inst.Mask.Type()))
+	}
+	return types.NewVector(maskType.Len, xType.ElemType)
 }
 
 // LLString returns the LLVM syntax representation of the instruction.

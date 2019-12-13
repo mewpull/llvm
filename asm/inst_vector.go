@@ -22,7 +22,8 @@ func (fgen *funcGen) newExtractElementInst(ident ir.LocalIdent, old *ast.Extract
 	if !ok {
 		panic(fmt.Errorf("invalid vector type; expected *types.VectorType, got %T", xType))
 	}
-	return &ir.InstExtractElement{LocalIdent: ident, Typ: xt.ElemType}, nil
+	_ = xt // TODO: store type for later validation; validate using xt.ElemType.
+	return &ir.InstExtractElement{LocalIdent: ident}, nil
 }
 
 // newInsertElementInst returns a new IR insertelement instruction (without body
@@ -36,7 +37,8 @@ func (fgen *funcGen) newInsertElementInst(ident ir.LocalIdent, old *ast.InsertEl
 	if !ok {
 		panic(fmt.Errorf("invalid vector type; expected *types.VectorType, got %T", xType))
 	}
-	return &ir.InstInsertElement{LocalIdent: ident, Typ: xt}, nil
+	_ = xt // TODO: store type for later validation; validate using xt.ElemType.
+	return &ir.InstInsertElement{LocalIdent: ident}, nil
 }
 
 // newShuffleVectorInst returns a new IR shufflevector instruction (without body
@@ -59,7 +61,8 @@ func (fgen *funcGen) newShuffleVectorInst(ident ir.LocalIdent, old *ast.ShuffleV
 		panic(fmt.Errorf("invalid vector type; expected *types.VectorType, got %T", maskType))
 	}
 	typ := types.NewVector(mt.Len, xt.ElemType)
-	return &ir.InstShuffleVector{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstShuffleVector{LocalIdent: ident}, nil
 }
 
 // === [ Translate AST to IR ] =================================================

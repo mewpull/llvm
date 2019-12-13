@@ -35,7 +35,7 @@ func (fgen *funcGen) newLoadInst(ident ir.LocalIdent, old *ast.LoadInst) (*ir.In
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstLoad{LocalIdent: ident, Typ: elemType}, nil
+	return &ir.InstLoad{LocalIdent: ident, ElemType: elemType}, nil
 }
 
 // newCmpXchgInst returns a new IR cmpxchg instruction (without body but with
@@ -46,7 +46,8 @@ func (fgen *funcGen) newCmpXchgInst(ident ir.LocalIdent, old *ast.CmpXchgInst) (
 		return nil, errors.WithStack(err)
 	}
 	typ := types.NewStruct(oldType, types.I8)
-	return &ir.InstCmpXchg{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstCmpXchg{LocalIdent: ident}, nil
 }
 
 // newAtomicRMWInst returns a new IR atomicrmw instruction (without body but
@@ -60,7 +61,8 @@ func (fgen *funcGen) newAtomicRMWInst(ident ir.LocalIdent, old *ast.AtomicRMWIns
 	if !ok {
 		panic(fmt.Errorf("invalid pointer type; expected *types.PointerType, got %T", dstType))
 	}
-	return &ir.InstAtomicRMW{LocalIdent: ident, Typ: dt.ElemType}, nil
+	_ = dt // TODO: store type for later validation; validate using dt.ElemType.
+	return &ir.InstAtomicRMW{LocalIdent: ident}, nil
 }
 
 // newGetElementPtrInst returns a new IR getelementptr instruction (without body
@@ -79,7 +81,8 @@ func (fgen *funcGen) newGetElementPtrInst(ident ir.LocalIdent, old *ast.GetEleme
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstGetElementPtr{LocalIdent: ident, ElemType: elemType, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstGetElementPtr{LocalIdent: ident, ElemType: elemType}, nil
 }
 
 // === [ Translate AST to IR ] =================================================
@@ -117,7 +120,7 @@ func (fgen *funcGen) irAllocaInst(new ir.Instruction, old *ast.AllocaInst) error
 	}
 	// (optional) Address space; stored in i.Typ.
 	if n, ok := old.AddrSpace(); ok {
-		inst.Typ.AddrSpace = irAddrSpace(n)
+		inst.AddrSpace = irAddrSpace(n)
 	}
 	// (optional) Metadata.
 	md, err := fgen.gen.irMetadataAttachments(old.Metadata())
@@ -365,6 +368,8 @@ func (fgen *funcGen) irGetElementPtrInst(new ir.Instruction, old *ast.GetElement
 }
 
 // ### [ Helper functions ] ####################################################
+
+// TODO: check if we can remove gepInstType and getIndex of package asm.
 
 // gepInstType computes the result type of a getelementptr instruction.
 //

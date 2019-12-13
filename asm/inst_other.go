@@ -29,7 +29,8 @@ func (fgen *funcGen) newICmpInst(ident ir.LocalIdent, old *ast.ICmpInst) (*ir.In
 	default:
 		panic(fmt.Errorf("invalid icmp operand type; expected *types.IntType, *types.PointerType or *types.VectorType, got %T", xType))
 	}
-	return &ir.InstICmp{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstICmp{LocalIdent: ident}, nil
 }
 
 // newFCmpInst returns a new IR fcmp instruction (without body but with type)
@@ -48,7 +49,8 @@ func (fgen *funcGen) newFCmpInst(ident ir.LocalIdent, old *ast.FCmpInst) (*ir.In
 	default:
 		panic(fmt.Errorf("invalid fcmp operand type; expected *types.FloatType or *types.VectorType, got %T", xType))
 	}
-	return &ir.InstFCmp{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstFCmp{LocalIdent: ident}, nil
 }
 
 // newPhiInst returns a new IR phi instruction (without body but with type)
@@ -58,7 +60,8 @@ func (fgen *funcGen) newPhiInst(ident ir.LocalIdent, old *ast.PhiInst) (*ir.Inst
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstPhi{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstPhi{LocalIdent: ident}, nil
 }
 
 // newSelectInst returns a new IR select instruction (without body but with
@@ -68,7 +71,8 @@ func (fgen *funcGen) newSelectInst(ident ir.LocalIdent, old *ast.SelectInst) (*i
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstSelect{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstSelect{LocalIdent: ident}, nil
 }
 
 // newCallInst returns a new IR call instruction (without body but with type)
@@ -80,7 +84,15 @@ func (fgen *funcGen) newCallInst(ident ir.LocalIdent, old *ast.CallInst) (*ir.In
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstCall{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	inst := &ir.InstCall{LocalIdent: ident}
+	// Record that the call instruction is to be interpreted as a non-value
+	// instruction. This is important as it determines the assignment of IDs to
+	// unnamed local variables.
+	if typ.Equal(types.Void) {
+		fgen.isVoid[inst] = true
+	}
+	return inst, nil
 }
 
 // newVAArgInst returns a new IR vaarg instruction (without body but with type)

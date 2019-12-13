@@ -22,8 +22,6 @@ type InstFNeg struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Fast math flags.
 	FastMathFlags []enum.FastMathFlag
 	// (optional) Metadata.
@@ -33,8 +31,6 @@ type InstFNeg struct {
 // NewFNeg returns a new fneg instruction based on the given operand.
 func NewFNeg(x value.Value) *InstFNeg {
 	inst := &InstFNeg{X: x}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -46,11 +42,7 @@ func (inst *InstFNeg) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstFNeg) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.X.Type()
-	}
-	return inst.Typ
+	return inst.X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.

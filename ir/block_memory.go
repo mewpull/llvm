@@ -21,9 +21,9 @@ func (block *Block) NewAlloca(elemType types.Type) *InstAlloca {
 // ~~~ [ load ] ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // NewLoad appends a new load instruction to the basic block based on the given
-// source address.
-func (block *Block) NewLoad(src value.Value) *InstLoad {
-	inst := NewLoad(src)
+// element type and source address.
+func (block *Block) NewLoad(elemType types.Type, src value.Value) *InstLoad {
+	inst := NewLoad(elemType, src)
 	block.Insts = append(block.Insts, inst)
 	return inst
 }
@@ -72,9 +72,9 @@ func (block *Block) NewAtomicRMW(op enum.AtomicOp, dst, x value.Value, ordering 
 // ~~~ [ getelementptr ] ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // NewGetElementPtr appends a new getelementptr instruction to the basic block
-// based on the given source address and element indices.
-func (block *Block) NewGetElementPtr(src value.Value, indices ...value.Value) *InstGetElementPtr {
-	inst := NewGetElementPtr(src, indices...)
+// based on the given element type, source address and element indices.
+func (block *Block) NewGetElementPtr(elemType types.Type, src value.Value, indices ...value.Value) *InstGetElementPtr {
+	inst := NewGetElementPtr(elemType, src, indices...)
 	block.Insts = append(block.Insts, inst)
 	return inst
 }

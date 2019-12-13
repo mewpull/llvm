@@ -17,7 +17,8 @@ func (fgen *funcGen) newAddInst(ident ir.LocalIdent, old *ast.AddInst) (*ir.Inst
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstAdd{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstAdd{LocalIdent: ident}, nil
 }
 
 // newFAddInst returns a new IR fadd instruction (without body but with type)
@@ -27,7 +28,8 @@ func (fgen *funcGen) newFAddInst(ident ir.LocalIdent, old *ast.FAddInst) (*ir.In
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstFAdd{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstFAdd{LocalIdent: ident}, nil
 }
 
 // newSubInst returns a new IR sub instruction (without body but with type)
@@ -37,7 +39,8 @@ func (fgen *funcGen) newSubInst(ident ir.LocalIdent, old *ast.SubInst) (*ir.Inst
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstSub{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstSub{LocalIdent: ident}, nil
 }
 
 // newFSubInst returns a new IR fsub instruction (without body but with type)
@@ -47,7 +50,8 @@ func (fgen *funcGen) newFSubInst(ident ir.LocalIdent, old *ast.FSubInst) (*ir.In
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstFSub{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstFSub{LocalIdent: ident}, nil
 }
 
 // newMulInst returns a new IR mul instruction (without body but with type)
@@ -57,7 +61,8 @@ func (fgen *funcGen) newMulInst(ident ir.LocalIdent, old *ast.MulInst) (*ir.Inst
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstMul{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstMul{LocalIdent: ident}, nil
 }
 
 // newFMulInst returns a new IR fmul instruction (without body but with type)
@@ -67,7 +72,8 @@ func (fgen *funcGen) newFMulInst(ident ir.LocalIdent, old *ast.FMulInst) (*ir.In
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstFMul{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstFMul{LocalIdent: ident}, nil
 }
 
 // newUDivInst returns a new IR udiv instruction (without body but with type)
@@ -77,7 +83,8 @@ func (fgen *funcGen) newUDivInst(ident ir.LocalIdent, old *ast.UDivInst) (*ir.In
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstUDiv{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstUDiv{LocalIdent: ident}, nil
 }
 
 // newSDivInst returns a new IR sdiv instruction (without body but with type)
@@ -87,7 +94,8 @@ func (fgen *funcGen) newSDivInst(ident ir.LocalIdent, old *ast.SDivInst) (*ir.In
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstSDiv{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstSDiv{LocalIdent: ident}, nil
 }
 
 // newFDivInst returns a new IR fdiv instruction (without body but with type)
@@ -97,7 +105,8 @@ func (fgen *funcGen) newFDivInst(ident ir.LocalIdent, old *ast.FDivInst) (*ir.In
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstFDiv{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstFDiv{LocalIdent: ident}, nil
 }
 
 // newURemInst returns a new IR urem instruction (without body but with type)
@@ -107,7 +116,8 @@ func (fgen *funcGen) newURemInst(ident ir.LocalIdent, old *ast.URemInst) (*ir.In
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstURem{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstURem{LocalIdent: ident}, nil
 }
 
 // newSRemInst returns a new IR srem instruction (without body but with type)
@@ -117,7 +127,8 @@ func (fgen *funcGen) newSRemInst(ident ir.LocalIdent, old *ast.SRemInst) (*ir.In
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstSRem{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstSRem{LocalIdent: ident}, nil
 }
 
 // newFRemInst returns a new IR frem instruction (without body but with type)
@@ -127,7 +138,8 @@ func (fgen *funcGen) newFRemInst(ident ir.LocalIdent, old *ast.FRemInst) (*ir.In
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstFRem{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstFRem{LocalIdent: ident}, nil
 }
 
 // === [ Translate AST to IR ] =================================================

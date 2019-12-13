@@ -26,9 +26,8 @@ type InstAlloca struct {
 
 	// extra.
 
-	// Type of result produced by the instruction, including an optional address
-	// space.
-	Typ *types.PointerType
+	// (optional) Address space.
+	AddrSpace types.AddrSpace
 	// (optional) In-alloca.
 	InAlloca bool
 	// (optional) Swift error.
@@ -42,8 +41,6 @@ type InstAlloca struct {
 // NewAlloca returns a new alloca instruction based on the given element type.
 func NewAlloca(elemType types.Type) *InstAlloca {
 	inst := &InstAlloca{ElemType: elemType}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -55,11 +52,9 @@ func (inst *InstAlloca) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstAlloca) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = types.NewPointer(inst.ElemType)
-	}
-	return inst.Typ
+	typ := types.NewPointer(inst.ElemType)
+	typ.AddrSpace = inst.AddrSpace
+	return typ
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -82,8 +77,8 @@ func (inst *InstAlloca) LLString() string {
 	if inst.Align != 0 {
 		fmt.Fprintf(buf, ", %s", inst.Align)
 	}
-	if inst.Typ.AddrSpace != 0 {
-		fmt.Fprintf(buf, ", %s", inst.Typ.AddrSpace)
+	if inst.AddrSpace != 0 {
+		fmt.Fprintf(buf, ", %s", inst.AddrSpace)
 	}
 	for _, md := range inst.Metadata {
 		fmt.Fprintf(buf, ", %s", md)
@@ -97,13 +92,13 @@ func (inst *InstAlloca) LLString() string {
 type InstLoad struct {
 	// Name of local variable associated with the result.
 	LocalIdent
+	// Element type of source.
+	ElemType types.Type
 	// Source address.
 	Src value.Value
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Atomic.
 	Atomic bool
 	// (optional) Volatile.
@@ -119,10 +114,8 @@ type InstLoad struct {
 }
 
 // NewLoad returns a new load instruction based on the given source address.
-func NewLoad(src value.Value) *InstLoad {
-	inst := &InstLoad{Src: src}
-	// Compute type.
-	inst.Type()
+func NewLoad(elemType types.Type, src value.Value) *InstLoad {
+	inst := &InstLoad{ElemType: elemType, Src: src}
 	return inst
 }
 
@@ -134,15 +127,7 @@ func (inst *InstLoad) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstLoad) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		t, ok := inst.Src.Type().(*types.PointerType)
-		if !ok {
-			panic(fmt.Errorf("invalid source type; expected *types.PointerType, got %T", inst.Src.Type()))
-		}
-		inst.Typ = t.ElemType
-	}
-	return inst.Typ
+	return inst.ElemType
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -166,7 +151,7 @@ func (inst *InstLoad) LLString() string {
 	if inst.Volatile {
 		buf.WriteString(" volatile")
 	}
-	fmt.Fprintf(buf, " %s, %s", inst.Typ, inst.Src)
+	fmt.Fprintf(buf, " %s, %s", inst.ElemType, inst.Src)
 	if len(inst.SyncScope) > 0 {
 		fmt.Fprintf(buf, " syncscope(%s)", quote(inst.SyncScope))
 	}
@@ -312,9 +297,6 @@ type InstCmpXchg struct {
 
 	// extra.
 
-	// Type of result produced by the instruction; the first field of the struct
-	// holds the old value, and the second field indicates success.
-	Typ *types.StructType
 	// (optional) Weak.
 	Weak bool
 	// (optional) Volatile.
@@ -330,8 +312,6 @@ type InstCmpXchg struct {
 // success and failure.
 func NewCmpXchg(ptr, cmp, new value.Value, successOrdering, failureOrdering enum.AtomicOrdering) *InstCmpXchg {
 	inst := &InstCmpXchg{Ptr: ptr, Cmp: cmp, New: new, SuccessOrdering: successOrdering, FailureOrdering: failureOrdering}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -341,14 +321,12 @@ func (inst *InstCmpXchg) String() string {
 	return fmt.Sprintf("%s %s", inst.Type(), inst.Ident())
 }
 
-// Type returns the type of the instruction.
+// Type returns the type of the instruction. The result type is a struct type
+// with two fields, where the first field holds the type of the old value, and
+// the second field is boolean and indicates success.
 func (inst *InstCmpXchg) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		oldType := inst.New.Type()
-		inst.Typ = types.NewStruct(oldType, types.I1)
-	}
-	return inst.Typ
+	oldType := inst.New.Type()
+	return types.NewStruct(oldType, types.I1)
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -394,8 +372,6 @@ type InstAtomicRMW struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Volatile.
 	Volatile bool
 	// (optional) Sync scope; empty if not present.
@@ -408,8 +384,6 @@ type InstAtomicRMW struct {
 // operation, destination address, operand and atomic ordering.
 func NewAtomicRMW(op enum.AtomicOp, dst, x value.Value, ordering enum.AtomicOrdering) *InstAtomicRMW {
 	inst := &InstAtomicRMW{Op: op, Dst: dst, X: x, Ordering: ordering}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -421,15 +395,11 @@ func (inst *InstAtomicRMW) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstAtomicRMW) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		t, ok := inst.Dst.Type().(*types.PointerType)
-		if !ok {
-			panic(fmt.Errorf("invalid destination type; expected *types.PointerType, got %T", inst.Dst.Type()))
-		}
-		inst.Typ = t.ElemType
+	t, ok := inst.Dst.Type().(*types.PointerType)
+	if !ok {
+		panic(fmt.Errorf("invalid destination type; expected *types.PointerType, got %T", inst.Dst.Type()))
 	}
-	return inst.Typ
+	return t.ElemType
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -468,23 +438,16 @@ type InstGetElementPtr struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type // *types.PointerType or *types.VectorType (with elements of pointer type)
 	// (optional) In-bounds.
 	InBounds bool
 	// (optional) Metadata.
 	Metadata
 }
 
-// TODO: refine NewGetElementPtr to take elemType as argument, as this is
-// really the type used to compute the result type of gep.
-
 // NewGetElementPtr returns a new getelementptr instruction based on the given
-// source address and element indices.
-func NewGetElementPtr(src value.Value, indices ...value.Value) *InstGetElementPtr {
-	inst := &InstGetElementPtr{Src: src, Indices: indices}
-	// Compute type.
-	inst.Type()
+// element type, source address and element indices.
+func NewGetElementPtr(elemType types.Type, src value.Value, indices ...value.Value) *InstGetElementPtr {
+	inst := &InstGetElementPtr{ElemType: elemType, Src: src, Indices: indices}
 	return inst
 }
 
@@ -494,30 +457,16 @@ func (inst *InstGetElementPtr) String() string {
 	return fmt.Sprintf("%s %s", inst.Type(), inst.Ident())
 }
 
-// Type returns the type of the instruction.
+// Type returns the type of the instruction. The result type is either pointer
+// type or vector of pointers type.
 func (inst *InstGetElementPtr) Type() types.Type {
-	// TODO: remove e.ElemType computation once NewGetElementPtr takes elemType
-	// as argument.
-	// Cache element type if not present.
 	if inst.ElemType == nil {
-		switch typ := inst.Src.Type().(type) {
-		case *types.PointerType:
-			inst.ElemType = typ.ElemType
-		case *types.VectorType:
-			t, ok := typ.ElemType.(*types.PointerType)
-			if !ok {
-				panic(fmt.Errorf("invalid vector element type; expected *types.Pointer, got %T", typ.ElemType))
-			}
-			inst.ElemType = t.ElemType
-		default:
-			panic(fmt.Errorf("invalid source type; expected *types.Pointer or *types.Vector, got %T", typ))
-		}
+		panic(fmt.Errorf("gep element type missing; got nil"))
 	}
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = gepInstType(inst.ElemType, inst.Src.Type(), inst.Indices)
+	if inst.Src == nil {
+		panic(fmt.Errorf("gep source missing; got nil"))
 	}
-	return inst.Typ
+	return gepInstType(inst.ElemType, inst.Src.Type(), inst.Indices)
 }
 
 // LLString returns the LLVM syntax representation of the instruction.

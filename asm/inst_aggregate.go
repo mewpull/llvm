@@ -20,7 +20,8 @@ func (fgen *funcGen) newExtractValueInst(ident ir.LocalIdent, old *ast.ExtractVa
 	}
 	indices := uintSlice(old.Indices())
 	typ := aggregateElemType(xType, indices)
-	return &ir.InstExtractValue{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstExtractValue{LocalIdent: ident}, nil
 }
 
 // newInsertValueInst returns a new IR insertvalue instruction (without body but
@@ -30,7 +31,8 @@ func (fgen *funcGen) newInsertValueInst(ident ir.LocalIdent, old *ast.InsertValu
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstInsertValue{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstInsertValue{LocalIdent: ident}, nil
 }
 
 // === [ Translate AST to IR ] =================================================

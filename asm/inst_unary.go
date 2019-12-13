@@ -17,7 +17,8 @@ func (fgen *funcGen) newFNegInst(ident ir.LocalIdent, old *ast.FNegInst) (*ir.In
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstFNeg{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstFNeg{LocalIdent: ident}, nil
 }
 
 // === [ Translate AST to IR ] =================================================

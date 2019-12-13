@@ -17,7 +17,8 @@ func (fgen *funcGen) newShlInst(ident ir.LocalIdent, old *ast.ShlInst) (*ir.Inst
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstShl{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstShl{LocalIdent: ident}, nil
 }
 
 // newLShrInst returns a new IR lshr instruction (without body but with type)
@@ -27,7 +28,8 @@ func (fgen *funcGen) newLShrInst(ident ir.LocalIdent, old *ast.LShrInst) (*ir.In
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstLShr{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstLShr{LocalIdent: ident}, nil
 }
 
 // newAShrInst returns a new IR ashr instruction (without body but with type)
@@ -37,7 +39,8 @@ func (fgen *funcGen) newAShrInst(ident ir.LocalIdent, old *ast.AShrInst) (*ir.In
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstAShr{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstAShr{LocalIdent: ident}, nil
 }
 
 // newAndInst returns a new IR and instruction (without body but with type)
@@ -47,7 +50,8 @@ func (fgen *funcGen) newAndInst(ident ir.LocalIdent, old *ast.AndInst) (*ir.Inst
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstAnd{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstAnd{LocalIdent: ident}, nil
 }
 
 // newOrInst returns a new IR or instruction (without body but with type) based
@@ -57,7 +61,8 @@ func (fgen *funcGen) newOrInst(ident ir.LocalIdent, old *ast.OrInst) (*ir.InstOr
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstOr{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstOr{LocalIdent: ident}, nil
 }
 
 // newXorInst returns a new IR xor instruction (without body but with type)
@@ -67,7 +72,8 @@ func (fgen *funcGen) newXorInst(ident ir.LocalIdent, old *ast.XorInst) (*ir.Inst
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.InstXor{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	return &ir.InstXor{LocalIdent: ident}, nil
 }
 
 // === [ Translate AST to IR ] =================================================

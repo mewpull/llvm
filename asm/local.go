@@ -21,8 +21,8 @@ package asm
 
 import (
 	"github.com/llir/ll/ast"
+	"github.com/llir/llvm/internal/enc"
 	"github.com/llir/llvm/ir"
-	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 	"github.com/pkg/errors"
 )
@@ -36,6 +36,11 @@ type funcGen struct {
 	// locals maps from local identifier (without '%' prefix) to corresponding IR
 	// value.
 	locals map[ir.LocalIdent]value.Value
+	// isVoid reports whether the given instruction or terminator has a void
+	// result type. Only call, invoke and callbr instructions are considered.
+	// This is important as it determines the assignment of IDs to unnamed local
+	// variables.
+	isVoid map[local]bool
 }
 
 // newFuncGen returns a new generator for the given IR function.
@@ -44,6 +49,7 @@ func newFuncGen(gen *generator, f *ir.Func) *funcGen {
 		gen:    gen,
 		f:      f,
 		locals: make(map[ir.LocalIdent]value.Value),
+		isVoid: make(map[local]bool),
 	}
 }
 
@@ -92,7 +98,7 @@ func (fgen *funcGen) createLocals(oldBlocks []ast.BasicBlock) error {
 	// Note: the type of call instructions and invoke terminators must be
 	// determined before assigning local IDs, as they may be values or non-values
 	// based on return type. This is done by fgen.newLocals.
-	if err := fgen.f.AssignIDs(); err != nil {
+	if err := fgen.assignIDs(fgen.f); err != nil {
 		return errors.WithStack(err)
 	}
 	// Index local identifiers.
@@ -148,7 +154,7 @@ func (fgen *funcGen) indexLocals() error {
 		// Index instructions.
 		for _, inst := range block.Insts {
 			v, ok := inst.(local)
-			if !ok || v.Type().Equal(types.Void) {
+			if !ok || fgen.isVoid[v] {
 				// Skip non-value instructions.
 				continue
 			}
@@ -159,7 +165,7 @@ func (fgen *funcGen) indexLocals() error {
 		}
 		// Index terminator.
 		v, ok := block.Term.(local)
-		if !ok || v.Type().Equal(types.Void) {
+		if !ok || fgen.isVoid[v] {
 			// Skip non-value terminators.
 			continue
 		}
@@ -189,4 +195,77 @@ func localIdentOfValue(v local) ir.LocalIdent {
 		return ir.LocalIdent{LocalID: v.ID()}
 	}
 	return ir.LocalIdent{LocalName: v.Name()}
+}
+
+// NOTE: assignIDs is copied from ir/func.go with slight modifications to handle
+// type lookup of callees using fgen.isVoid instead of callee.Type(), as the
+// callees are not yet resolved when we need to assign IDs.
+
+// assignIDs assigns IDs to unnamed local variables.
+func (fgen *funcGen) assignIDs(f *ir.Func) error {
+	if len(f.Blocks) == 0 {
+		return nil
+	}
+	id := int64(0)
+	setName := func(n local) error {
+		if n.IsUnnamed() {
+			if n.ID() != 0 && id != n.ID() {
+				want := id
+				got := n.ID()
+				return errors.Errorf("invalid local ID in function %q, expected %s, got %s", f.Ident(), enc.LocalID(want), enc.LocalID(got))
+			}
+			n.SetID(id)
+			id++
+		}
+		return nil
+	}
+	for _, param := range f.Params {
+		// Assign local IDs to unnamed parameters of function definitions.
+		if err := setName(param); err != nil {
+			return errors.WithStack(err)
+		}
+	}
+	for _, block := range f.Blocks {
+		// Assign local IDs to unnamed basic blocks.
+		if err := setName(block); err != nil {
+			return errors.WithStack(err)
+		}
+		for _, inst := range block.Insts {
+			n, ok := inst.(local)
+			if !ok {
+				continue
+			}
+			// Skip void instructions.
+			// TODO: Check if any other value instructions than call may have void
+			// type.
+			if fgen.isVoidValue(n) {
+				continue
+			}
+			// Assign local IDs to unnamed local variables.
+			if err := setName(n); err != nil {
+				return errors.WithStack(err)
+			}
+		}
+		n, ok := block.Term.(local)
+		if !ok {
+			continue
+		}
+		if fgen.isVoidValue(n) {
+			continue
+		}
+		if err := setName(n); err != nil {
+			return errors.WithStack(err)
+		}
+	}
+	return nil
+}
+
+// isVoidValue reports whether the given named value is a non-value (i.e. a call
+// instruction, or an invoke or callbr terminator with void-return type).
+func (fgen *funcGen) isVoidValue(n local) bool {
+	switch n.(type) {
+	case *ir.InstCall, *ir.TermInvoke, *ir.TermCallBr:
+		return fgen.isVoid[n]
+	}
+	return false
 }

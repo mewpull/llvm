@@ -70,7 +70,15 @@ func (fgen *funcGen) newInvokeTerm(ident ir.LocalIdent, old *ast.InvokeTerm) (*i
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.TermInvoke{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	term := &ir.TermInvoke{LocalIdent: ident}
+	// Record that the invoke instruction is to be interpreted as a non-value
+	// instruction. This is important as it determines the assignment of IDs to
+	// unnamed local variables.
+	if typ.Equal(types.Void) {
+		fgen.isVoid[term] = true
+	}
+	return term, nil
 }
 
 // newCallBrTerm returns a new IR callbr terminator (without body but with type)
@@ -80,7 +88,15 @@ func (fgen *funcGen) newCallBrTerm(ident ir.LocalIdent, old *ast.CallBrTerm) (*i
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return &ir.TermCallBr{LocalIdent: ident, Typ: typ}, nil
+	_ = typ // TODO: store type for later validation.
+	term := &ir.TermCallBr{LocalIdent: ident}
+	// Record that the invoke instruction is to be interpreted as a non-value
+	// instruction. This is important as it determines the assignment of IDs to
+	// unnamed local variables.
+	if typ.Equal(types.Void) {
+		fgen.isVoid[term] = true
+	}
+	return term, nil
 }
 
 // === [ Translate AST to IR ] =================================================

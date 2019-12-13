@@ -316,9 +316,6 @@ type TermInvoke struct {
 
 	// extra.
 
-	// Type of result produced by the terminator, or function signature of the
-	// invokee (as used when invokee is variadic).
-	Typ types.Type
 	// Successor basic blocks of the terminator.
 	Successors []*Block
 	// (optional) Calling convention; zero if not present.
@@ -342,8 +339,6 @@ type TermInvoke struct {
 // TODO: specify the set of underlying types of invokee.
 func NewInvoke(invokee value.Value, args []value.Value, normal, exception *Block) *TermInvoke {
 	term := &TermInvoke{Invokee: invokee, Args: args, Normal: normal, Exception: exception}
-	// Compute type.
-	term.Type()
 	return term
 }
 
@@ -355,26 +350,8 @@ func (term *TermInvoke) String() string {
 
 // Type returns the type of the terminator.
 func (term *TermInvoke) Type() types.Type {
-	// Cache type if not present.
-	if term.Typ == nil {
-		t, ok := term.Invokee.Type().(*types.PointerType)
-		if !ok {
-			panic(fmt.Errorf("invalid invokee type; expected *types.PointerType, got %T", term.Invokee.Type()))
-		}
-		sig, ok := t.ElemType.(*types.FuncType)
-		if !ok {
-			panic(fmt.Errorf("invalid invokee type; expected *types.FuncType, got %T", t.ElemType))
-		}
-		if sig.Variadic {
-			term.Typ = sig
-		} else {
-			term.Typ = sig.RetType
-		}
-	}
-	if t, ok := term.Typ.(*types.FuncType); ok {
-		return t.RetType
-	}
-	return term.Typ
+	sig := term.Sig()
+	return sig.RetType
 }
 
 // Succs returns the successor basic blocks of the terminator.
@@ -408,13 +385,11 @@ func (term *TermInvoke) LLString() string {
 		fmt.Fprintf(buf, " %s", term.AddrSpace)
 	}
 	// Use function signature instead of return type for variadic functions.
-	typ := term.Type()
-	if t, ok := term.Typ.(*types.FuncType); ok {
-		if t.Variadic {
-			typ = t
-		}
+	invokeeType := term.Type()
+	if sig := term.Sig(); sig.Variadic {
+		invokeeType = sig
 	}
-	fmt.Fprintf(buf, " %s %s(", typ, term.Invokee.Ident())
+	fmt.Fprintf(buf, " %s %s(", invokeeType, term.Invokee.Ident())
 	for i, arg := range term.Args {
 		if i != 0 {
 			buf.WriteString(", ")
@@ -442,6 +417,19 @@ func (term *TermInvoke) LLString() string {
 	return buf.String()
 }
 
+// Sig returns the function signature of the invokee.
+func (term *TermInvoke) Sig() *types.FuncType {
+	t, ok := term.Invokee.Type().(*types.PointerType)
+	if !ok {
+		panic(fmt.Errorf("invalid invokee type; expected *types.PointerType, got %T", term.Invokee.Type()))
+	}
+	sig, ok := t.ElemType.(*types.FuncType)
+	if !ok {
+		panic(fmt.Errorf("invalid invokee type; expected *types.FuncType, got %T", t.ElemType))
+	}
+	return sig
+}
+
 // --- [ callbr ] --------------------------------------------------------------
 
 // TermCallBr is an LLVM IR callbr terminator.
@@ -464,9 +452,6 @@ type TermCallBr struct {
 
 	// extra.
 
-	// Type of result produced by the terminator, or function signature of the
-	// callee (as used when callee is variadic).
-	Typ types.Type
 	// Successor basic blocks of the terminator.
 	Successors []*Block
 	// (optional) Calling convention; zero if not present.
@@ -490,8 +475,6 @@ type TermCallBr struct {
 // TODO: specify the set of underlying types of callee.
 func NewCallBr(callee value.Value, args []value.Value, normal *Block, others ...*Block) *TermCallBr {
 	term := &TermCallBr{Callee: callee, Args: args, Normal: normal, Others: others}
-	// Compute type.
-	term.Type()
 	return term
 }
 
@@ -503,26 +486,8 @@ func (term *TermCallBr) String() string {
 
 // Type returns the type of the terminator.
 func (term *TermCallBr) Type() types.Type {
-	// Cache type if not present.
-	if term.Typ == nil {
-		t, ok := term.Callee.Type().(*types.PointerType)
-		if !ok {
-			panic(fmt.Errorf("invalid callee type; expected *types.PointerType, got %T", term.Callee.Type()))
-		}
-		sig, ok := t.ElemType.(*types.FuncType)
-		if !ok {
-			panic(fmt.Errorf("invalid callee type; expected *types.FuncType, got %T", t.ElemType))
-		}
-		if sig.Variadic {
-			term.Typ = sig
-		} else {
-			term.Typ = sig.RetType
-		}
-	}
-	if t, ok := term.Typ.(*types.FuncType); ok {
-		return t.RetType
-	}
-	return term.Typ
+	sig := term.Sig()
+	return sig.RetType
 }
 
 // Succs returns the successor basic blocks of the terminator.
@@ -557,13 +522,11 @@ func (term *TermCallBr) LLString() string {
 		fmt.Fprintf(buf, " %s", term.AddrSpace)
 	}
 	// Use function signature instead of return type for variadic functions.
-	typ := term.Type()
-	if t, ok := term.Typ.(*types.FuncType); ok {
-		if t.Variadic {
-			typ = t
-		}
+	calleeType := term.Type()
+	if sig := term.Sig(); sig.Variadic {
+		calleeType = sig
 	}
-	fmt.Fprintf(buf, " %s %s(", typ, term.Callee.Ident())
+	fmt.Fprintf(buf, " %s %s(", calleeType, term.Callee.Ident())
 	for i, arg := range term.Args {
 		if i != 0 {
 			buf.WriteString(", ")
@@ -596,6 +559,19 @@ func (term *TermCallBr) LLString() string {
 		fmt.Fprintf(buf, ", %s", md)
 	}
 	return buf.String()
+}
+
+// Sig returns the function signature of the callee.
+func (term *TermCallBr) Sig() *types.FuncType {
+	t, ok := term.Callee.Type().(*types.PointerType)
+	if !ok {
+		panic(fmt.Errorf("invalid callee type; expected *types.PointerType, got %T", term.Callee.Type()))
+	}
+	sig, ok := t.ElemType.(*types.FuncType)
+	if !ok {
+		panic(fmt.Errorf("invalid callee type; expected *types.FuncType, got %T", t.ElemType))
+	}
+	return sig
 }
 
 // --- [ resume ] --------------------------------------------------------------

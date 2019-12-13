@@ -22,8 +22,6 @@ type InstShl struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Overflow flags.
 	OverflowFlags []enum.OverflowFlag
 	// (optional) Metadata.
@@ -33,8 +31,6 @@ type InstShl struct {
 // NewShl returns a new shl instruction based on the given operands.
 func NewShl(x, y value.Value) *InstShl {
 	inst := &InstShl{X: x, Y: y}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -46,11 +42,7 @@ func (inst *InstShl) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstShl) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.X.Type()
-	}
-	return inst.Typ
+	return inst.X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -81,8 +73,6 @@ type InstLShr struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Exact.
 	Exact bool
 	// (optional) Metadata.
@@ -92,8 +82,6 @@ type InstLShr struct {
 // NewLShr returns a new lshr instruction based on the given operands.
 func NewLShr(x, y value.Value) *InstLShr {
 	inst := &InstLShr{X: x, Y: y}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -105,11 +93,7 @@ func (inst *InstLShr) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstLShr) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.X.Type()
-	}
-	return inst.Typ
+	return inst.X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -140,8 +124,6 @@ type InstAShr struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Exact.
 	Exact bool
 	// (optional) Metadata.
@@ -151,8 +133,6 @@ type InstAShr struct {
 // NewAShr returns a new ashr instruction based on the given operands.
 func NewAShr(x, y value.Value) *InstAShr {
 	inst := &InstAShr{X: x, Y: y}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -164,11 +144,7 @@ func (inst *InstAShr) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstAShr) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.X.Type()
-	}
-	return inst.Typ
+	return inst.X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -199,8 +175,6 @@ type InstAnd struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Metadata.
 	Metadata
 }
@@ -208,8 +182,6 @@ type InstAnd struct {
 // NewAnd returns a new and instruction based on the given operands.
 func NewAnd(x, y value.Value) *InstAnd {
 	inst := &InstAnd{X: x, Y: y}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -221,11 +193,7 @@ func (inst *InstAnd) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstAnd) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.X.Type()
-	}
-	return inst.Typ
+	return inst.X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -251,8 +219,6 @@ type InstOr struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Metadata.
 	Metadata
 }
@@ -260,8 +226,6 @@ type InstOr struct {
 // NewOr returns a new or instruction based on the given operands.
 func NewOr(x, y value.Value) *InstOr {
 	inst := &InstOr{X: x, Y: y}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -273,11 +237,7 @@ func (inst *InstOr) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstOr) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.X.Type()
-	}
-	return inst.Typ
+	return inst.X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -303,8 +263,6 @@ type InstXor struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Metadata.
 	Metadata
 }
@@ -312,8 +270,6 @@ type InstXor struct {
 // NewXor returns a new xor instruction based on the given operands.
 func NewXor(x, y value.Value) *InstXor {
 	inst := &InstXor{X: x, Y: y}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -325,11 +281,7 @@ func (inst *InstXor) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstXor) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.X.Type()
-	}
-	return inst.Typ
+	return inst.X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.

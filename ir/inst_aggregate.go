@@ -23,8 +23,6 @@ type InstExtractValue struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Metadata.
 	Metadata
 }
@@ -33,8 +31,6 @@ type InstExtractValue struct {
 // aggregate value and indicies.
 func NewExtractValue(x value.Value, indices ...uint64) *InstExtractValue {
 	inst := &InstExtractValue{X: x, Indices: indices}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -46,11 +42,7 @@ func (inst *InstExtractValue) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstExtractValue) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = aggregateElemType(inst.X.Type(), inst.Indices)
-	}
-	return inst.Typ
+	return aggregateElemType(inst.X.Type(), inst.Indices)
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -84,8 +76,6 @@ type InstInsertValue struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Metadata.
 	Metadata
 }
@@ -98,8 +88,6 @@ func NewInsertValue(x, elem value.Value, indices ...uint64) *InstInsertValue {
 		panic(fmt.Errorf("insertvalue elem type mismatch, expected %v, got %v", elemType, elem.Type()))
 	}
 	inst := &InstInsertValue{X: x, Elem: elem, Indices: indices}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -111,11 +99,7 @@ func (inst *InstInsertValue) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstInsertValue) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.X.Type()
-	}
-	return inst.Typ
+	return inst.X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.

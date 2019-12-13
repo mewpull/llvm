@@ -22,8 +22,6 @@ type InstAdd struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Overflow flags.
 	OverflowFlags []enum.OverflowFlag
 	// (optional) Metadata.
@@ -33,8 +31,6 @@ type InstAdd struct {
 // NewAdd returns a new add instruction based on the given operands.
 func NewAdd(x, y value.Value) *InstAdd {
 	inst := &InstAdd{X: x, Y: y}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -46,11 +42,7 @@ func (inst *InstAdd) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstAdd) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.X.Type()
-	}
-	return inst.Typ
+	return inst.X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -81,8 +73,6 @@ type InstFAdd struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Fast math flags.
 	FastMathFlags []enum.FastMathFlag
 	// (optional) Metadata.
@@ -92,8 +82,6 @@ type InstFAdd struct {
 // NewFAdd returns a new fadd instruction based on the given operands.
 func NewFAdd(x, y value.Value) *InstFAdd {
 	inst := &InstFAdd{X: x, Y: y}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -105,11 +93,7 @@ func (inst *InstFAdd) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstFAdd) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.X.Type()
-	}
-	return inst.Typ
+	return inst.X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -140,8 +124,6 @@ type InstSub struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Overflow flags.
 	OverflowFlags []enum.OverflowFlag
 	// (optional) Metadata.
@@ -151,8 +133,6 @@ type InstSub struct {
 // NewSub returns a new sub instruction based on the given operands.
 func NewSub(x, y value.Value) *InstSub {
 	inst := &InstSub{X: x, Y: y}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -164,11 +144,7 @@ func (inst *InstSub) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstSub) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.X.Type()
-	}
-	return inst.Typ
+	return inst.X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -199,8 +175,6 @@ type InstFSub struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Fast math flags.
 	FastMathFlags []enum.FastMathFlag
 	// (optional) Metadata.
@@ -210,8 +184,6 @@ type InstFSub struct {
 // NewFSub returns a new fsub instruction based on the given operands.
 func NewFSub(x, y value.Value) *InstFSub {
 	inst := &InstFSub{X: x, Y: y}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -223,11 +195,7 @@ func (inst *InstFSub) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstFSub) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.X.Type()
-	}
-	return inst.Typ
+	return inst.X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -258,8 +226,6 @@ type InstMul struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Overflow flags.
 	OverflowFlags []enum.OverflowFlag
 	// (optional) Metadata.
@@ -269,8 +235,6 @@ type InstMul struct {
 // NewMul returns a new mul instruction based on the given operands.
 func NewMul(x, y value.Value) *InstMul {
 	inst := &InstMul{X: x, Y: y}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -282,11 +246,7 @@ func (inst *InstMul) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstMul) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.X.Type()
-	}
-	return inst.Typ
+	return inst.X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -317,8 +277,6 @@ type InstFMul struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Fast math flags.
 	FastMathFlags []enum.FastMathFlag
 	// (optional) Metadata.
@@ -328,8 +286,6 @@ type InstFMul struct {
 // NewFMul returns a new fmul instruction based on the given operands.
 func NewFMul(x, y value.Value) *InstFMul {
 	inst := &InstFMul{X: x, Y: y}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -341,11 +297,7 @@ func (inst *InstFMul) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstFMul) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.X.Type()
-	}
-	return inst.Typ
+	return inst.X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -376,8 +328,6 @@ type InstUDiv struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Exact.
 	Exact bool
 	// (optional) Metadata.
@@ -387,8 +337,6 @@ type InstUDiv struct {
 // NewUDiv returns a new udiv instruction based on the given operands.
 func NewUDiv(x, y value.Value) *InstUDiv {
 	inst := &InstUDiv{X: x, Y: y}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -400,11 +348,7 @@ func (inst *InstUDiv) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstUDiv) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.X.Type()
-	}
-	return inst.Typ
+	return inst.X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -435,8 +379,6 @@ type InstSDiv struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Exact.
 	Exact bool
 	// (optional) Metadata.
@@ -446,8 +388,6 @@ type InstSDiv struct {
 // NewSDiv returns a new sdiv instruction based on the given operands.
 func NewSDiv(x, y value.Value) *InstSDiv {
 	inst := &InstSDiv{X: x, Y: y}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -459,11 +399,7 @@ func (inst *InstSDiv) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstSDiv) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.X.Type()
-	}
-	return inst.Typ
+	return inst.X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -494,8 +430,6 @@ type InstFDiv struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Fast math flags.
 	FastMathFlags []enum.FastMathFlag
 	// (optional) Metadata.
@@ -505,8 +439,6 @@ type InstFDiv struct {
 // NewFDiv returns a new fdiv instruction based on the given operands.
 func NewFDiv(x, y value.Value) *InstFDiv {
 	inst := &InstFDiv{X: x, Y: y}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -518,11 +450,7 @@ func (inst *InstFDiv) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstFDiv) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.X.Type()
-	}
-	return inst.Typ
+	return inst.X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -553,8 +481,6 @@ type InstURem struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Metadata.
 	Metadata
 }
@@ -562,8 +488,6 @@ type InstURem struct {
 // NewURem returns a new urem instruction based on the given operands.
 func NewURem(x, y value.Value) *InstURem {
 	inst := &InstURem{X: x, Y: y}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -575,11 +499,7 @@ func (inst *InstURem) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstURem) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.X.Type()
-	}
-	return inst.Typ
+	return inst.X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -605,8 +525,6 @@ type InstSRem struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Metadata.
 	Metadata
 }
@@ -614,8 +532,6 @@ type InstSRem struct {
 // NewSRem returns a new srem instruction based on the given operands.
 func NewSRem(x, y value.Value) *InstSRem {
 	inst := &InstSRem{X: x, Y: y}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -627,11 +543,7 @@ func (inst *InstSRem) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstSRem) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.X.Type()
-	}
-	return inst.Typ
+	return inst.X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
@@ -657,8 +569,6 @@ type InstFRem struct {
 
 	// extra.
 
-	// Type of result produced by the instruction.
-	Typ types.Type
 	// (optional) Fast math flags.
 	FastMathFlags []enum.FastMathFlag
 	// (optional) Metadata.
@@ -668,8 +578,6 @@ type InstFRem struct {
 // NewFRem returns a new frem instruction based on the given operands.
 func NewFRem(x, y value.Value) *InstFRem {
 	inst := &InstFRem{X: x, Y: y}
-	// Compute type.
-	inst.Type()
 	return inst
 }
 
@@ -681,11 +589,7 @@ func (inst *InstFRem) String() string {
 
 // Type returns the type of the instruction.
 func (inst *InstFRem) Type() types.Type {
-	// Cache type if not present.
-	if inst.Typ == nil {
-		inst.Typ = inst.X.Type()
-	}
-	return inst.Typ
+	return inst.X.Type()
 }
 
 // LLString returns the LLVM syntax representation of the instruction.
